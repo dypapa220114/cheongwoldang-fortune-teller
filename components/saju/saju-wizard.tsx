@@ -430,7 +430,10 @@ function InputStep({
               value={state.time}
               disabled={state.unknownTime}
               onChange={(e) => state.setTime(e.target.value)}
-              style={{ colorScheme: 'dark' }}
+              style={{
+                colorScheme: 'light',
+                WebkitTextFillColor: '#000000', // 모바일 크롬 텍스트 강제 고정
+              }}
               className="w-full rounded-2xl bg-neutral-800 border border-neutral-700 px-4 py-4 text-base text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 disabled:opacity-50"
             />
             <Clock className="pointer-events-none absolute right-4 top-1/2 h-5 w-5 -translate-y-1/2 text-neutral-500" />
