@@ -199,6 +199,15 @@ export async function POST(request: NextRequest) {
     readings = fallbackReadings
   }
 
+  // 👇 [추가] 선택한 topics가 있을 경우 해당 항목만 결과에서 필터링
+  if (Array.isArray(meta.topics) && meta.topics.length > 0) {
+    readings = readings.filter((item: any) => 
+      meta.topics.includes(item.topic) || 
+      meta.topics.includes(item.title) || 
+      meta.topics.includes(item.category)
+    );
+  }
+  
   return NextResponse.json({
     name: body.name?.trim() ?? '',
     pillars: result.pillars,

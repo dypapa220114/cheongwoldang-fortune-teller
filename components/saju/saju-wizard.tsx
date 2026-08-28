@@ -90,8 +90,16 @@ export function SajuWizard() {
     async function fetchSaju() {
       setIsLoading(true)
       setSajuError(null)
+
+      // 👇 최소 대기 시간 설정 (3500ms = 3.5초, 필요에 따라 4000~5000으로 조정 가능)
+      const MIN_DELAY = 3500
+      const delayPromise = new Promise((resolve) => setTimeout(resolve, MIN_DELAY))
+
       try {
-        const res = await fetch('/api/saju', {
+        //const res = await fetch('/api/saju', {
+        // 👇 API 호출과 타이머를 동시에 진행 (둘 중 늦게 끝나는 시점까지 대기)
+        const [res, _] = await Promise.all([
+        fetch('/api/saju', { 
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(
@@ -110,7 +118,10 @@ export function SajuWizard() {
               worry,
             }),
           ),
-        })
+        }),
+          delayPromise, // 최소 딜레이 보장
+        ])
+
         const data = await res.json()
         if (cancelled) return
         if (!res.ok) {
@@ -179,7 +190,8 @@ export function SajuWizard() {
     scrollTop()
   }
 
-  const bgImage = def.kind === 'input' ? SHAMAN_BG : '/images/altar-bg.png'
+  // ⭕ 수정 (def?.kind 로 변경)
+  const bgImage = def?.kind === 'input' ? SHAMAN_BG : '/images/altar-bg.png'
   const showBack = step > 0 && step < 8
 
   return (
@@ -266,7 +278,8 @@ export function SajuWizard() {
               index={def.readingIndex!}
               onNext={next}
               onPrev={prev}
-              isLast={step === 10 + READING_COUNT - 1}
+              //isLast={step === 10 + READING_COUNT - 1}
+              isLast={def.readingIndex === readings.length - 1}
               readings={readings}
               loading={isLoading && readings.length === 0}
             />
@@ -424,25 +437,38 @@ function InputStep({
       <>
         <SpeechBubble>태어난 시는 아는가?</SpeechBubble>
         <BottomSheet>
-          <div className="relative mb-3">
-          <input
+        <div className="relative mb-3">
+            <input
               type="time"
               value={state.time}
               disabled={state.unknownTime}
               onChange={(e) => state.setTime(e.target.value)}
-              style={{
-                colorScheme: 'light',
-                WebkitTextFillColor: '#000000', // 모바일 크롬 텍스트 강제 고정
+              /* 1. PC 크롬 클릭 시 피커 호출 로직 유지 */
+              onClick={(e) => {
+                if (state.unknownTime) return; // 미입력 체크 시 동작 방지
+                try {
+                  e.currentTarget.showPicker();
+                } catch (err) {
+                  console.warn("Input showPicker is not supported in this browser:", err);
+                }
               }}
-              className="w-full rounded-2xl bg-neutral-800 border border-neutral-700 px-4 py-4 text-base text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 disabled:opacity-50"
-            />
-            <Clock className="pointer-events-none absolute right-4 top-1/2 h-5 w-5 -translate-y-1/2 text-neutral-500" />
+              style={{ colorScheme: 'light' }}
+              /* 2. 레퍼런스 스타일 유지 (흰색 배경 + 에메랄드 테두리) */
+              className="w-full rounded-2xl bg-white px-5 py-4 text-lg font-bold text-neutral-900 border-2 border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-300 disabled:opacity-50 cursor-pointer"/>
+            
+            <Clock className="pointer-events-none absolute right-4 top-1/2 h-5 w-5 -translate-y-1/2 text-neutral-400" />
           </div>
           <label className="mb-4 flex items-center gap-2 text-sm text-white/85">
             <input
               type="checkbox"
               checked={state.unknownTime}
-              onChange={(e) => state.setUnknownTime(e.target.checked)}
+              onChange={(e) => {
+                const isChecked = e.target.checked;
+                state.setUnknownTime(isChecked);
+                if (isChecked) {
+                  state.setTime(''); // 체크박스 체크 시 입력된 시간 클리어
+                }
+              }}
               className="h-4 w-4 accent-shaman-green"
             />
             모르면 모른다 혀도 괜찮혀.
@@ -801,6 +827,28 @@ function ReadingStep({
   loading?: boolean
 }) {
   const reading = readings[index]
+  // 👇 817번 라인에 들어갈 위치
+  useEffect(() => {
+    if (!reading && !loading && readings.length > 0) {
+      onNext()
+    }
+  }, [reading, loading, readings.length, onNext])
+
+  if (!reading) {
+    if (loading) {
+      return (
+        <div className="flex flex-1 flex-col justify-end p-4">
+          <div className="rounded-3xl bg-white p-6 shadow-2xl text-center">
+            <p className="text-[15px] text-neutral-600">
+              신령님이 풀이를 적는 중이로다...
+            </p>
+          </div>
+        </div>
+      )
+    }
+    // 데이터가 없을 때는 불필요한 에러 메세지 카드 대신 null 반환
+    return null
+  }
 
   if (!reading) {
     return (
