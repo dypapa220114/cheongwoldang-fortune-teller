@@ -425,13 +425,13 @@ function InputStep({
         <SpeechBubble>태어난 시는 아는가?</SpeechBubble>
         <BottomSheet>
           <div className="relative mb-3">
-            <input
+          <input
               type="time"
               value={state.time}
               disabled={state.unknownTime}
               onChange={(e) => state.setTime(e.target.value)}
-              style={{ colorScheme: 'light' }}
-              className="w-full rounded-2xl bg-white px-4 py-4 text-base text-neutral-900 focus:outline-none disabled:opacity-50"
+              style={{ colorScheme: 'dark' }}
+              className="w-full rounded-2xl bg-neutral-800 border border-neutral-700 px-4 py-4 text-base text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 disabled:opacity-50"
             />
             <Clock className="pointer-events-none absolute right-4 top-1/2 h-5 w-5 -translate-y-1/2 text-neutral-500" />
           </div>
