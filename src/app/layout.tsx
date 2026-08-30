@@ -4,7 +4,6 @@ import type { Metadata, Viewport } from 'next'
 import { Do_Hyeon, Noto_Sans_KR } from 'next/font/google'
 import './globals.css'
 
-
 const doHyeon = Do_Hyeon({
   weight: '400',
   subsets: ['latin'],
@@ -37,6 +36,23 @@ export const metadata: Metadata = {
       },
     ],
     apple: '/apple-icon.png',
+  },
+  // 💡 카카오톡 등 SNS 링크 공유 시 썸네일 이미지 설정을 위한 Open Graph
+  openGraph: {
+    title: '소름돋는 무료사주 청월당',
+    description: '무당 할머니가 봐주는 무료 사주 풀이 - 청월당',
+    url: 'https://saju-cheongwoldang.vercel.app',
+    siteName: '청월당',
+    images: [
+      {
+        url: 'https://saju-cheongwoldang.vercel.app/og-image.png',
+        width: 1200,
+        height: 630,
+        alt: '청월당 무료사주',
+      },
+    ],
+    locale: 'ko_KR',
+    type: 'website',
   },
 }
 
