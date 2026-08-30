@@ -920,7 +920,10 @@ function ShareStep({ onAskAgain }: { onAskAgain: () => void }) {
     // 1. 카카오 SDK 공유 (최우선 실행)
     if (typeof window !== 'undefined' && window.Kakao) {
       if (!window.Kakao.isInitialized()) {
-        window.Kakao.init(process.env.NEXT_PUBLIC_KAKAO_JS_KEY);
+        // 환경변수 없으면 JS 키 하드코딩값 적용
+        const kakaoKey = process.env.NEXT_PUBLIC_KAKAO_JS_KEY || 'b7fe278a2ac3db7f7de29bfd793e2332';
+        window.Kakao.init(kakaoKey);
+        //window.Kakao.init(process.env.NEXT_PUBLIC_KAKAO_JS_KEY);
       }
 
       if (window.Kakao.isInitialized()) {
