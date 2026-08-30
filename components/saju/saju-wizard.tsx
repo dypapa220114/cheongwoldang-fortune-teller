@@ -919,12 +919,13 @@ function ShareStep({ onAskAgain }: { onAskAgain: () => void }) {
 
     // 1. 카카오 SDK 공유 (최우선 실행)
     if (typeof window !== 'undefined' && window.Kakao) {
-      if (!window.Kakao.isInitialized()) {
-        // 환경변수 없으면 JS 키 하드코딩값 적용
-        const kakaoKey = process.env.NEXT_PUBLIC_KAKAO_JS_KEY || 'b7fe278a2ac3db7f7de29bfd793e2332';
-        window.Kakao.init(kakaoKey);
-        //window.Kakao.init(process.env.NEXT_PUBLIC_KAKAO_JS_KEY);
+      // 💡 기존에 잘못 초기화되어 있을 수 있으므로 반드시 cleanup 후 재초기화
+      if (window.Kakao.isInitialized()) {
+        window.Kakao.cleanup();
       }
+      
+      // Vercel 변수 검증 생략하고 JavaScript 키 직접 지정 (공개키이므로 안전)
+      window.Kakao.init('b7fe278a2ac3db7f7de29bfd793e2332');
 
       if (window.Kakao.isInitialized()) {
         window.Kakao.Share.sendDefault({
@@ -932,7 +933,8 @@ function ShareStep({ onAskAgain }: { onAskAgain: () => void }) {
           content: {
             title: '소름돋는 무료사주 청월당',
             description: '단 3분 만에 무료로 확인하는 AI 사주풀이!',
-            imageUrl: 'https://saju-cheongwoldang.vercel.app/images/og-image.png', // OG 이미지 URL
+            // 💡 public/og-image.png 위치에 맞춰 경로 수정
+            imageUrl: 'https://saju-cheongwoldang.vercel.app/og-image.png',
             link: {
               mobileWebUrl: url,
               webUrl: url,
