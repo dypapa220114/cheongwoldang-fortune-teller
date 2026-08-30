@@ -1,7 +1,9 @@
+import Script from 'next/script'
 import { Analytics } from '@vercel/analytics/next'
 import type { Metadata, Viewport } from 'next'
 import { Do_Hyeon, Noto_Sans_KR } from 'next/font/google'
 import './globals.css'
+
 
 const doHyeon = Do_Hyeon({
   weight: '400',
@@ -56,6 +58,10 @@ export default function RootLayout({
       <body className="font-sans antialiased">
         {children}
         {process.env.NODE_ENV === 'production' && <Analytics />}
+        <Script
+          src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js"
+          strategy="afterInteractive"
+        />
       </body>
     </html>
   )

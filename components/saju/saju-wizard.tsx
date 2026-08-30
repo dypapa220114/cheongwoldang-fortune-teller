@@ -4,6 +4,13 @@ import { useEffect, useState } from 'react'
 import { ArrowLeft, Clock, MessageCircle } from 'lucide-react'
 import { type Pillar, type Reading } from '@/lib/saju-data'
 
+// Kakao SDK 타입 선언 (TS2339 에러 방지)
+declare global {
+  interface Window {
+    Kakao: any;
+  }
+}
+
 type SajuApiResponse = {
   name: string
   pillars: Pillar[]
@@ -92,7 +99,7 @@ export function SajuWizard() {
       setSajuError(null)
 
       // 👇 최소 대기 시간 설정 (3500ms = 3.5초, 필요에 따라 4000~5000으로 조정 가능)
-      const MIN_DELAY = 3500
+      const MIN_DELAY = 5000
       const delayPromise = new Promise((resolve) => setTimeout(resolve, MIN_DELAY))
 
       try {
@@ -908,23 +915,60 @@ function ReadingStep({
 
 function ShareStep({ onAskAgain }: { onAskAgain: () => void }) {
   async function handleShare() {
-    const url = window.location.href
+    const url = window.location.href;
 
+    // 1. 카카오 SDK 공유 (최우선 실행)
+    if (typeof window !== 'undefined' && window.Kakao) {
+      if (!window.Kakao.isInitialized()) {
+        window.Kakao.init(process.env.NEXT_PUBLIC_KAKAO_JS_KEY);
+      }
+
+      if (window.Kakao.isInitialized()) {
+        window.Kakao.Share.sendDefault({
+          objectType: 'feed',
+          content: {
+            title: '소름돋는 무료사주 청월당',
+            description: '단 3분 만에 무료로 확인하는 AI 사주풀이!',
+            imageUrl: 'https://saju-cheongwoldang.vercel.app/images/og-image.png', // OG 이미지 URL
+            link: {
+              mobileWebUrl: url,
+              webUrl: url,
+            },
+          },
+          buttons: [
+            {
+              title: '사주 보러가기',
+              link: {
+                mobileWebUrl: url,
+                webUrl: url,
+              },
+            },
+          ],
+        });
+        return;
+      }
+    }
+
+    // 2. 카카오 SDK가 없을 경우 모바일 기본 공유(Web Share API) 시도
     if (typeof navigator.share === 'function') {
       try {
         await navigator.share({
           title: '소름돋는 무료사주 청월당',
           text: '단 3분 만에 무료로 확인하는 AI 사주풀이!',
           url,
-        })
+        });
+        return;
       } catch {
         // 사용자가 공유를 취소한 경우
+        return;
       }
-      return
     }
 
-    await navigator.clipboard.writeText(url)
-    alert('사주 공유 링크가 복사되었습니다!')
+    // 3. 최후의 폴백: 클립보드 복사
+    if (navigator.clipboard) {
+      await navigator.clipboard.writeText(url);
+      alert('사주 공유 링크가 복사되었습니다!');
+    }
   }
 
   return (
