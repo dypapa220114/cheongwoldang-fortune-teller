@@ -45,7 +45,8 @@ export const metadata: Metadata = {
     siteName: '청월당',
     images: [
       {
-        url: 'https://saju-cheongwoldang.vercel.app/og-image.png',
+        // 💡 /images/ 경로 추가
+        url: 'https://saju-cheongwoldang.vercel.app/images/og-image.png',
         width: 1200,
         height: 630,
         alt: '청월당 무료사주',

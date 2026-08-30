@@ -934,7 +934,7 @@ function ShareStep({ onAskAgain }: { onAskAgain: () => void }) {
             title: '소름돋는 무료사주 청월당',
             description: '단 3분 만에 무료로 확인하는 AI 사주풀이!',
             // 💡 public/og-image.png 위치에 맞춰 경로 수정
-            imageUrl: 'https://saju-cheongwoldang.vercel.app/og-image.png',
+            imageUrl: 'https://saju-cheongwoldang.vercel.app/images/og-image.png',
             link: {
               mobileWebUrl: url,
               webUrl: url,
